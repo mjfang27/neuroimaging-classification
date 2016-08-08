@@ -1,0 +1,9 @@
+numpy
+pandas
+pyneurovault
+cognitiveatlas
+scipy
+scikit-learn
+nibabel
+pybraincompare
+nilearn
