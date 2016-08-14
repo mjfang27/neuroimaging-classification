@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 
 from pybraincompare.mr.datasets import get_standard_brain
 from cognitiveatlas.api import get_task, get_concept
@@ -18,7 +18,7 @@ if len(sys.argv) < 2:
     print("You must specify a base project directory as your first argument.")
     sys.exit()
 
-base=sys.argv[1]
+base = sys.argv[1]
 print("BASE project directory is defined as %s" %(base))
 
 data_directory = os.path.abspath("%s/data" %(base))
