@@ -1,4 +1,6 @@
-#!/usr/bin/env python2
+"""
+first step in forward modeling analysis - getting the data from neurosynth
+"""
 
 from pybraincompare.mr.datasets import get_standard_brain
 from cognitiveatlas.api import get_task, get_concept
@@ -11,14 +13,24 @@ import numpy
 import pandas
 import os
 import sys
+import nibabel
 
-here = os.path.dirname(os.path.abspath(__file__))
+try:
+    __IPYTHON__
+    base='/Users/poldrack/data_unsynced/forward-modeling-cognitive-concepts'
+except NameError:
+    __IPYTHON__=False
+    try:
+        base=sys.argv[1]
+    except IndexError:
+        print("You must specify a base project directory as your first argument.")
+        sys.exit()
 
-if len(sys.argv) < 2:
-    print("You must specify a base project directory as your first argument.")
-    sys.exit()
+if __IPYTHON__:
+    here=os.getcwd()
+else:
+    here = os.path.dirname(os.path.abspath(__file__))
 
-base=sys.argv[1]
 print("BASE project directory is defined as %s" %(base))
 
 data_directory = os.path.abspath("%s/data" %(base))
@@ -38,8 +50,18 @@ collections = collections[collections.DOI.isnull()==False]
 # Useless, but might as well save it
 collections.to_csv("%s/collections_with_dois.tsv" %(results_directory),encoding="utf-8",sep="\t")
 
+
 # Get image meta data for collections
 images = api.get_images(collection_pks=collections.collection_id.tolist())
+
+
+# load list of included image IDs and exclude others
+good_images=pandas.read_csv('included_images.csv',header=None,names=['image_id'])
+images=images.loc[images['image_id'].isin(good_images['image_id'])]
+
+## the following won't really have any effect, since the filtering
+## is done by the explicit list above, but I'm leaving them
+## to make it clear how the filtering was initially done
 
 # Get rid of any not in MNI
 images = images[images.not_mni == False]
@@ -57,6 +79,7 @@ images = images[images.modality=='fMRI-BOLD']
 # We can't use Rest or other/none
 images = images[images.cognitive_paradigm_cogatlas_id.isnull()==False]
 images = images[images.cognitive_paradigm_cogatlas.isin(["None / Other","rest eyes closed","rest eyes open"])==False]
+
 
 # Limit to Z and T maps (all are Z and T)
 z = images[images.map_type == "Z map"]
@@ -76,7 +99,7 @@ resampled_dir = "%s/resampled" %(data_directory)
 # We need to select a subset of the images, just the T Maps from the set
 tmaps = [ "%s/%06d.nii.gz" %(resampled_dir,x) for x in t.image_id.tolist()]
 
-# We need degrees of freedom to convert properly to Zstat maps. 
+# We need degrees of freedom to convert properly to Zstat maps.
 dofs = []
 for row in t.iterrows():
     dof = row[1].number_of_subjects -2
@@ -91,11 +114,19 @@ for tt in range(0,len(tmaps)):
     tmap = tmaps[tt]
     dof = dofs[tt]
     zmap_new = "%s/%s" %(outfolder_z,os.path.split(tmap)[-1])
-    TtoZ(tmap,output_nii=zmap_new,dof=dof)
+    if os.path.exists(zmap_new):
+        continue
+    if os.path.exists(tmap):
+        TtoZ(tmap,output_nii=zmap_new,dof=dof)
+    else:
+        print('skipping due to missing tmap:%s'%tmap)
 
 # Copy all (already) Z maps to the folder
 zmaps = [ "%s/%06d.nii.gz" %(resampled_dir,x) for x in z.image_id.tolist()]
 for zmap in zmaps:
+    if not os.path.exists(zmap):
+        print('skipping missing zmap: %s'%zmap)
+        continue
     zmap_new = "%s/%s" %(outfolder_z,os.path.split(zmap)[-1])
     shutil.copyfile(zmap,zmap_new)
 
