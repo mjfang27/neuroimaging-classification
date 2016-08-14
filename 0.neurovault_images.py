@@ -113,7 +113,7 @@ if not os.path.exists(outfolder_z4mm):
 maps = glob("%s/*.nii.gz" %(outfolder_z))
 for mr in maps:
     image_name = os.path.basename(mr)
-    print "Resampling %s to 4mm..." %(image_name)
+    print("Resampling %s to 4mm..." %(image_name))
     nii = nibabel.load(mr)
     nii_resamp = resample_img(nii,target_affine=numpy.diag([4,4,4]))
     nibabel.save(nii_resamp,"%s/%s" %(outfolder_z4mm,image_name))
