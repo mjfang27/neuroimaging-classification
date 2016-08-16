@@ -17,7 +17,10 @@ import nibabel
 
 try:
     __IPYTHON__
-    base='/Users/poldrack/data_unsynced/forward-modeling-cognitive-concepts'
+    try:
+        base
+    except:
+        raise Exception('you must set "base" to the base variable ')
 except NameError:
     __IPYTHON__=False
     try:
