@@ -1,40 +1,34 @@
 """
-first step in forward modeling analysis - getting the data from neurosynth
+first step in forward modeling analysis - getting the data from NeuroVault,
+    labeled with cognitive concepts from the Cognitive Atlas
+
 """
 
-from pybraincompare.mr.datasets import get_standard_brain
 from cognitiveatlas.api import get_task, get_concept
+
 from pybraincompare.compare.maths import TtoZ
+from pybraincompare.mr.datasets import get_standard_brain
 from nilearn.image import resample_img
 from pyneurovault import api
+
 from glob import glob
-import shutil
-import numpy
-import pandas
-import os
-import sys
+from utils import (
+   get_base, get_pwd
+)
+
 import nibabel
+import numpy
+import os
+import pandas
+import shutil
+import sys
 
-try:
-    __IPYTHON__
-    try:
-        base
-    except:
-        raise Exception('you must set "base" to the base variable ')
-except NameError:
-    __IPYTHON__=False
-    try:
-        base=sys.argv[1]
-    except IndexError:
-        print("You must specify a base project directory as your first argument.")
-        sys.exit()
+if sys.version_info < (3, 0):
+    from exceptions import ValueError
 
-if __IPYTHON__:
-    here=os.getcwd()
-else:
-    here = os.path.dirname(os.path.abspath(__file__))
-
-print("BASE project directory is defined as %s" %(base))
+# Get the base and present working directory
+base = get_base()
+here = get_pwd()
 
 data_directory = os.path.abspath("%s/data" %(base))
 results_directory = os.path.abspath("%s/results" %(base))
@@ -57,14 +51,16 @@ collections.to_csv("%s/collections_with_dois.tsv" %(results_directory),encoding=
 # Get image meta data for collections
 images = api.get_images(collection_pks=collections.collection_id.tolist())
 
-
-# load list of included image IDs and exclude others
-good_images=pandas.read_csv('included_images.csv',header=None,names=['image_id'])
-images=images.loc[images['image_id'].isin(good_images['image_id'])]
+# load list of included image IDs (curated by Poldracklab) and exclude others
+curated_images = pandas.read_csv('%s/included_images.csv' %(data_directory),header=None,names=['image_id'])
+images = images.loc[images['image_id'].isin(curated_images['image_id'])]
 
 ## the following won't really have any effect, since the filtering
 ## is done by the explicit list above, but I'm leaving them
 ## to make it clear how the filtering was initially done
+## however, if any of these criteria change in the neurovault
+## database (modality, MNI, thresholded description, cognitive atlas task)
+## this list could be filtered further
 
 # Get rid of any not in MNI
 images = images[images.not_mni == False]
@@ -82,7 +78,6 @@ images = images[images.modality=='fMRI-BOLD']
 # We can't use Rest or other/none
 images = images[images.cognitive_paradigm_cogatlas_id.isnull()==False]
 images = images[images.cognitive_paradigm_cogatlas.isin(["None / Other","rest eyes closed","rest eyes open"])==False]
-
 
 # Limit to Z and T maps (all are Z and T)
 z = images[images.map_type == "Z map"]
@@ -138,6 +133,10 @@ if len(glob("%s/*.nii.gz" %(outfolder_z))) != images.shape[0]:
 
 # We will actually need this one.
 images.to_csv("%s/filtered_contrast_images.tsv" %(results_directory),encoding="utf-8",sep="\t")
+
+# Give the user a warning if the number of images is different
+if images.shape[0] != 93:
+    print("Warning, the original analysis had 93 images, and this number has changed to %s." %(images.shape[0]))
 
 # Finally, resample images to 4mm voxel for classification analysis
 outfolder_z4mm = "%s/resampled_z_4mm" %(data_directory)
