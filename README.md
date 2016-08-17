@@ -24,8 +24,43 @@ You then can run the first script to download neurovault images and prepare maps
 
       python 0.neurovault_images.py /scratch/users/vsochat/forward-modeling-analysis
 
+If you are using IPYTHON, then you should define the base directory in your terminal first:
+
+      base="/scratch/users/vsochat/forward-modeling-analysis"
+
 Your resampled 4mm, Z-maps will be in `data/resampled_z_4mm`
 
-### Running the Analysis
+The final preparation that you must do for your data is to generate lookup tables for cognitive concept annotations, applied to images. Retrieving these annotations (a set of labels for each statistical brain map) uses the Cognitive Atlas api, and so we should do this once, and save the results in a data frame for lookup to be most efficient. You can equivalently run the script [1.prep_semantic_comparison.py](1.prep_semantic_comparison.py) to do this:
 
-**will write after above tested on TACC**
+      python 1.prep_semantic_comparison.py /scratch/users/vsochat/forward-modeling-analysis
+
+The equivalent applies for the base directory if you are using IPython. This will produce a lookup table of images (rows) by cognitive concepts (columns) in your data directory, an example file generated at the time of the actual analysis is provided ([.results/concepts_binary_df.tsv](.results/concepts_binary_df.tsv)).
+
+### Running the Analysis
+We use a permutation approach that holds two images out, builds the forward model with the remaining data, and tests on the two images:
+
+      Classification framework
+      for image1 in all images:
+         for image2 in allimages:
+             if image1 != image2:
+                 hold out image 1 and image 2, generate regression parameter matrix using other images
+                 generate predicted image for image 1 [PR1]
+                 generate predicted image for image 2 [PR2]
+                 classify image 1 as fitting best to PR1 or PR2
+                 classify image 2 as fitting best to PR1 or PR2
+
+To run this, we used a SLURM cluster, with a submission script, [2.run_encoding_regression_performance.py](2.run_encoding_regression_performance.py), that dynamically generates and submits jobs with [encoding_regression_performance.py](encoding_regression_performance.py). You shouldn't need to edit the latter, however you should look over the first to check the submission variables and the commands best fit for your cluster. At the start of the script we've provided variables for you to specify runtime (for a single job), memory, and any other submission commands:
+
+      # VARIABLES FOR SLURM
+      max_runtime="2-00:00"                    # Two days. Each script needs ~10-15 minutes, 30 is recommended for buffer
+      memory="32000"                           # 16000 might also work
+      submission_command="sbatch"                  # Your cluster submission command, eg sbatch, qsub
+      submission_args="-p russpold --qos russpold" # Does not need spaces to left and right
+
+The runscript will produce two directories, `.out` and `.job` in your script directory (defined as the variable `here`). If you need to re-run something, you can find the jobfiles in `.job`. To debug, all output and error logs will be in `.out`. The results of the permutations, each a pickled file with the naming schema (image1)_(image2)_perform.pkl will be placed in `results/permutations`.
+
+### Generating the Null Model
+
+### Parsing Results
+
+To be added/written when the above is tested!
