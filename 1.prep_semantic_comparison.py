@@ -1,22 +1,28 @@
-#!/usr/bin/python
+"""
+second step in forward modeling analysis - generating data structures to look up associated Cognitive Atlas terms
+    with the images downloaded in 0.neurovault_images.py
+
+"""
 
 from cognitiveatlas.api import get_concept
+
 from glob import glob
-import pandas
+
 import numpy
-import pickle
 import os
+import pandas
+import pickle
 import re
 import sys
 
-here = os.path.dirname(os.path.abspath(__file__))
+from utils import (
+   get_base, get_pwd, make_dirs
+)
 
-if len(sys.argv) < 2:
-    print("You must specify a base project directory as your first argument.")
-    sys.exit()
 
-base = sys.argv[1]
-print(("BASE project directory is defined as %s" %(base)))
+# Get the base and present working directory
+base = get_base()
+here = get_pwd()
 
 data = os.path.abspath("%s/data" %(base))
 results = os.path.abspath("%s/results" %(base))

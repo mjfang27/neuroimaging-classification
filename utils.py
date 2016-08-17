@@ -34,3 +34,12 @@ def get_pwd():
     else:
         return os.path.dirname(os.path.abspath(__file__))
 
+
+def make_dirs(folders,reason=""):
+    '''make directories if they don't exist'''
+    if not isinstance(folders,list):
+        folders = [folders]
+    for folder in folders:
+        if not os.path.exists(folder):
+            print("Creating directory %s %s" %(folder,reason)) 
+            os.mkdir(folder)

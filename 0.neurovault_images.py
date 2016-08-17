@@ -13,7 +13,7 @@ from pyneurovault import api
 
 from glob import glob
 from utils import (
-   get_base, get_pwd
+   get_base, get_pwd, make_dirs
 )
 
 import nibabel
@@ -34,9 +34,7 @@ data_directory = os.path.abspath("%s/data" %(base))
 results_directory = os.path.abspath("%s/results" %(base))
 
 folders = [data_directory,results_directory]
-for folder in folders:
-    if not os.path.exists(folder):
-        os.mkdir(folder)
+make_dirs(folders)
 
 # Get all collections
 collections = api.get_collections()
@@ -105,8 +103,7 @@ for row in t.iterrows():
 
 # We will move converted Z maps, and as is Z maps, to a common folder
 outfolder_z = "%s/resampled_z" %(data_directory)
-if not os.path.exists(outfolder_z):
-    os.mkdir(outfolder_z)
+make_dirs(outfolder_z)
 
 for tt in range(0,len(tmaps)):
     tmap = tmaps[tt]
@@ -140,8 +137,7 @@ if images.shape[0] != 93:
 
 # Finally, resample images to 4mm voxel for classification analysis
 outfolder_z4mm = "%s/resampled_z_4mm" %(data_directory)
-if not os.path.exists(outfolder_z4mm):
-    os.mkdir(outfolder_z4mm)
+make_dirs(outfolder_z4mm)
 
 maps = glob("%s/*.nii.gz" %(outfolder_z))
 for mr in maps:
