@@ -49,7 +49,7 @@ We use a permutation approach that holds two images out, builds the forward mode
                  classify image 1 as fitting best to PR1 or PR2
                  classify image 2 as fitting best to PR1 or PR2
 
-To run this, we used a SLURM cluster, with a submission script, [2.run_encoding_regression_performance.py](2.run_encoding_regression_performance.py), that dynamically generates and submits jobs with [encoding_regression_performance.py](encoding_regression_performance.py). You shouldn't need to edit the latter, however you should look over the first to check the submission variables and the commands best fit for your cluster. At the start of the script we've provided variables for you to specify runtime (for a single job), memory, and any other submission commands:
+To run this, we used a SLURM cluster, with a submission script, [2.run_encoding_regression_performance.py](2.run_encoding_regression_performance.py), that dynamically generates and submits jobs with [2.encoding_regression_performance.py](2.encoding_regression_performance.py). You shouldn't need to edit the latter, however you should look over the first to check the submission variables and the commands best fit for your cluster. At the start of the script we've provided variables for you to specify runtime (for a single job), memory, and any other submission commands:
 
       # VARIABLES FOR SLURM
       max_runtime="2-00:00"                    # Two days. Each script needs ~10-15 minutes, 30 is recommended for buffer
