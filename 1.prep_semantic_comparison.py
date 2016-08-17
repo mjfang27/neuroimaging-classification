@@ -16,7 +16,7 @@ if len(sys.argv) < 2:
     sys.exit()
 
 base = sys.argv[1]
-print("BASE project directory is defined as %s" %(base))
+print(("BASE project directory is defined as %s" %(base)))
 
 data = os.path.abspath("%s/data" %(base))
 results = os.path.abspath("%s/results" %(base))
@@ -42,7 +42,7 @@ for row in images.iterrows():
         unique_concepts[idx] = concepts
     
 all_concepts = []
-for image_id,concepts in unique_concepts.iteritems():
+for image_id,concepts in unique_concepts.items():
     for concept in concepts:
         if concept not in all_concepts:
             all_concepts.append(concept)
@@ -52,7 +52,7 @@ res = {"all_concepts":all_concepts,"unique_concepts":unique_concepts,"images":im
 
 ## STEP 1: GENERATE IMAGE BY CONCEPT DATA FRAME
 concept_df = pandas.DataFrame(0,columns=all_concepts,index=images.image_id.unique().tolist())
-for image_id,concepts in unique_concepts.iteritems():
+for image_id,concepts in unique_concepts.items():
     concept_df.loc[image_id,concepts] = 1   
 
 res["concept_df"] = concept_df
@@ -64,7 +64,7 @@ image_folder = "%s/resampled_z_4mm" %(data)
 files = glob("%s/*.nii.gz" %image_folder)
 
 if len(files) == 0:
-    print("Error, did not find image files in %s. Did you generate them with 0.neurovault_images.py?" %(image_folder))
+    print(("Error, did not find image files in %s. Did you generate them with 0.neurovault_images.py?" %(image_folder)))
 else:
     lookup = dict()
     for f in files:
@@ -72,6 +72,6 @@ else:
         if image_id in concept_df.index:
             lookup[image_id] = f
         else:
-            print("Cannot find image %s in concept data frame" %(image_id))
+            print(("Cannot find image %s in concept data frame" %(image_id)))
 
     pickle.dump(lookup,open("%s/image_nii_lookup.pkl" %results,"wb"))
