@@ -1,3 +1,6 @@
+Continuing the work of [Vanessa Sochat et. al.](https://github.com/vsoch/forward-modeling-cognitive-concepts)
+
+------
 # Forward Modeling of Cognitive Concepts
 
 This is a quasi-reproducible repo to run the "thesis version" of semantic image comparison. I was planning on making a Singularity (or other) container, but Russ is trying to run this on TACC, so neither of those will work. The original pipeline was run on Sherlock with Python 2.7.6, and this uses a SLURM job submission framework. If you don't use that, you'll need to update those scripts. Please see [semantic-image-comparison-analysis](https://github.com/vsoch/semantic-image-comparison/blob/master/SUMMARY.md) for a complete history of this work. This final repo represents only a snapshot of the pulling and tugging on data that was done to arrive at this result.
